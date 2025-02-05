@@ -1,0 +1,352 @@
+import torch
+import torch.optim as optim
+from torch.optim import lr_scheduler
+from torch.utils.data import DataLoader
+from src.custom_dataset import AquacultureData
+from src.models import models
+import numpy as np
+import yaml
+import torch.nn as nn
+import glob
+import os
+#import wandb
+import argparse
+from PIL import Image
+import random
+from torch.optim import AdamW
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.optim.lr_scheduler import LambdaLR
+from torch.optim import Adam
+import tqdm
+import pandas as pd
+
+################################## useful class and functions ##################################################
+
+warmup_iters = 1500
+warmup_ratio = 1e-6
+power = 1.0
+total_steps=10000
+
+def lr_lambda(current_step):
+    if current_step < warmup_iters:
+        # Linear warmup phase
+        return warmup_ratio + (1 - warmup_ratio) * (current_step / warmup_iters)
+    else:
+        # Polynomial decay
+        return (1 - (current_step - warmup_iters) / (total_steps - warmup_iters)) ** power
+
+
+def segmentation_loss(target, pred, device, class_weights, ignore_index):
+    
+    target = target.long()
+            
+    class_weights = torch.tensor(class_weights, dtype=torch.float32).to(device)
+    criterion = nn.CrossEntropyLoss(ignore_index=ignore_index, weight=class_weights).to(device) 
+    loss = criterion(pred, target) 
+
+    return loss
+    
+def save_checkpoint(model, optimizer, epoch, train_loss, val_loss, filename):
+
+    checkpoint = {
+        "epoch": epoch,
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        "train_loss": train_loss,
+        "val_loss":val_loss
+    }
+    torch.save(checkpoint, filename)
+    print(f"Checkpoint saved at {filename}")
+
+def plot_output_image(target, output, epoch, output_dir):
+
+    target = target.detach().cpu().numpy()
+    output = output.detach().cpu().numpy()
+    img = Image.fromarray(output, mode='F') #PIL Image
+    target_img = Image.fromarray(target, mode='F') #PIL Image
+
+    # Save the image
+    output_image_path = os.path.join(output_dir,f"segmentation_output_epoch_{epoch}.tif")
+    img.save(output_image_path)
+    if epoch == 0:
+        target_image_path = os.path.join(output_dir,f"segmentation_target_epoch_{epoch}.tif")
+        target_img.save(target_image_path)
+
+# def plot_output_image(model, device, epoch, means, stds, input_path, prediction_img_dir):
+    
+#     model.eval()  
+
+#     if_img=1
+#     img=load_raster(input_path, if_img, crop=(224, 224))
+
+#     final_image=preprocess_image(img, means, stds)
+#     final_image=final_image.to(device)
+
+    
+#     with torch.no_grad():
+#         output = model(final_image)  # [1, n_segmentation_class, 224, 224]
+
+#     # Remove batch dimension
+#     output = output.squeeze(0)  # [n_segmentation_class, 224, 224]
+
+#     predicted_mask = torch.argmax(output, dim=0)  # shape [224, 224]
+#     predicted_mask = predicted_mask.cpu().numpy()
+#     binary_image = (predicted_mask * 255).astype(np.uint8)
+#     img = Image.fromarray(binary_image, mode='L') #PIL Image
+
+#     # Save the image
+#     output_image_path = os.path.join(prediction_img_dir,f"segmentation_output_epoch_{epoch}.png")
+#     img.save(output_image_path)
+
+def compute_accuracy(labels, output):
+
+    
+    # (batch_size, 2_class,time_frame,224, 224) ->  (batch_size, 224, 224)
+    predicted = torch.argmax(output, dim=1)
+
+    correct = (predicted == labels).sum().item() 
+    total = labels.numel()  # Total number of elements in labels
+    accuracy = correct / total 
+
+    return accuracy
+
+def calculate_miou(output, target, device):
+    
+    eps=1e-6
+    #output.shape = B,n_classes,H,W
+    num_classes=output.shape[1]
+    preds = torch.argmax(output, dim=1)
+
+    # Flatten the tensors
+    preds = preds.view(-1) 
+    target = target.view(-1)  
+
+    # Initialize intersection and union for each class
+    intersection = torch.zeros(num_classes).to(device)
+    union = torch.zeros(num_classes).to(device)
+
+    for cls in range(num_classes): #starts from 0
+
+        # Create binary masks for the current class
+        pred_mask = (preds == cls).float()
+        target_mask = (target == cls).float()
+
+        # Calculate intersection and union
+        intersection[cls] = (pred_mask * target_mask).sum()
+        union[cls] = pred_mask.sum() + target_mask.sum() - intersection[cls]
+
+    # Calculate IoU for each class for all images in one batch
+    iou = intersection / (union + eps)  # Add eps to avoid division by zero
+
+    # Calculate mean IoU (all class avergae)
+    mean_iou = iou.mean().item()
+
+    return mean_iou
+
+#######################################################################################
+
+def main():
+
+    with open('config.yaml', 'r') as file:
+        config = yaml.safe_load(file)
+    
+    device=config["device_name"]
+    n_channel=config["model"]["n_channel"]
+    n_class=config["model"]["n_class"]
+    n_frame=config["data"]["n_frame"]
+    n_time_steps=config["data"]["n_time_steps"]
+    n_iteration=config["n_iteration"]
+    embed_size=config["model"]["encoder_embed_dim"]
+    dec_embed_size=config["model"]["dec_embed_dim"]
+    data_dir=config["data"]["data_dir"]
+    dataset_name=config["data"]["dataset_name"]
+    train_csv_path=config["data"]["train_csv_path"]
+    val_csv_path=config["data"]["val_csv_path"]             
+    train_batch_size=config["training"]["train_batch_size"]
+    val_batch_size=config["validation"]["val_batch_size"]
+    apply_normalization=config["data"]["apply_normalization"]
+    global_stats=config["data"]["global_stats"]
+    transformations=config["data"]["transformations"]
+    learning_rate=config["training"]["learning_rate"]
+    class_weights=config["class_weights"]
+    ignore_index=config["ignore_index"]
+    #segment_input=config["segment_input_path"]
+    output_dir=config["output_dir"]
+    #class_weights=config["class_weights"]
+    #ignore_index=config["ignore_index"]
+    input_size=config["data"]["input_size"]
+    patch_size=config["data"]["patch_size"]
+    checkpoint = os.path.join(output_dir, 'best_checkpoint.pt')
+    #subset = config["training"]["subset"]
+    #target_norm = config["data"]["target_norm"]
+    #input_norm = config["data"]["input_norm"]
+    input = config["data"]["input"]
+    arch = config["model"]["arch"]
+
+
+    # Print all the configuration parameters
+    print(f"Learning Rate: {learning_rate}")
+    print(f"Batch Size: {train_batch_size}")
+    print(f"Number of Epochs: {n_iteration}")
+    print(f"Number of Input Channel: {n_channel}")
+    print(f"Number of Segmentation Class: {n_class}")
+    print(f"Used device name: {device}")
+    print(f"Checkpoint Path: {checkpoint}")
+    print(f"Data input dir:{data_dir}")
+    
+    os.makedirs(output_dir, exist_ok=True)
+
+    with open(os.path.join(output_dir, 'config.yaml'), 'w') as file:
+        yaml.safe_dump(config, file)
+    
+    wandb.init(
+             # set the wandb project where this run will be logged
+             project=config["wandb_project"]
+             )
+    
+    wandb.run.log_code(".")
+    
+    
+    #initialize dataset class
+    aquaculture_dataset_train = AquacultureData(data_dir, usage="train", dataset_name=dataset_name, 
+                                                csv_path=train_csv_path, apply_normalization=apply_normalization, 
+                                                global_stats=global_stats, trans=transformations)
+    aquaculture_dataset_val = AquacultureData(data_dir, usage="validation", dataset_name=dataset_name, 
+                                                csv_path=val_csv_path, apply_normalization=apply_normalization, 
+                                                global_stats=global_stats, trans=transformations)
+    
+    #initialize dataloader
+    train_dataloader=DataLoader(aquaculture_dataset_train, batch_size=train_batch_size,
+                                shuffle=config["training"]["shuffle"], num_workers=1)
+    val_dataloader=DataLoader(aquaculture_dataset_val, batch_size=val_batch_size,
+                              shuffle=config["validation"]["shuffle"], num_workers=1)
+
+    #initialize model    
+    model_weights = config["prithvi_model_new_weight"] 
+    
+    model_wrapper = models[arch]
+    #wrapper of prithvi #initialization of prithvi is done by initializing prithvi_loader.py
+    model=model_wrapper(n_channel, n_class, n_frame, embed_size, input_size,
+                          patch_size,model_weights) 
+    model=model.to(device)
+
+    optimizer = Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), weight_decay=0.05)
+    optimizer_config = {'grad_clip': None}
+    scheduler = LambdaLR(optimizer, lr_lambda=lr_lambda)
+    
+    #best_loss=torch.tensor(float('inf'))
+    #training_log = []
+    best_loss = 0
+    best_miou_val = 0
+    
+
+    for i in range(n_iteration):
+
+        loss_i = 0.0
+        miou_train = []
+        acc_dataset_train = []
+
+        print("iteration started")
+
+        ##################################### train phase   #######################################
+        model.train()
+        
+        inner_pbar = tqdm.tqdm(
+            range(len(train_dataloader)), colour="blue", desc="Training Epoch", leave=True)
+
+        for j, (input, target) in enumerate(train_dataloader):
+        
+            input = input.to(device)
+            target = target.to(device)
+        
+            optimizer.zero_grad()
+            out = model(input)
+            loss=segmentation_loss(target, out, device, class_weights, ignore_index)
+            loss_i += loss.item() * input.size(0)
+            batch_acc = compute_accuracy(target, out)
+            acc_dataset_train.append(batch_acc)
+            miou_batch=calculate_miou(out, target, device)
+            miou_train.append(miou_batch)
+
+            rmse = torch.sqrt(loss.item())
+
+            loss.backward()
+            optimizer.step()
+            scheduler.step()
+            #inner_pbar.update(1)
+            #inner_pbar.set_description(f"Training Batch Loss: {loss.item()}, True RMSE: {rmse}", refresh=True)
+
+        acc_total_train=np.mean(acc_dataset_train)
+        miou_train=np.mean(miou_train)
+        epoch_loss_train=(loss_i)/len(train_dataloader.dataset)
+        
+        #epoch_loss_train=(loss_i)/len(train_dataloader.dataset)
+        #inner_pbar.close()
+        wandb.log({"epoch": i + 1, "train_loss": epoch_loss_train,"acc_train":acc_total_train,
+                   "learning_rate": optimizer.param_groups[0]['lr'],"miou_train":miou_train})
+
+        ########### Validation Phase ############################################################
+        model.eval()
+
+        val_loss = 0.0
+        miou_valid=[]
+        acc_dataset_val=[]
+        #inner_pbar = tqdm.tqdm(range(len(val_dataloader)), colour="green", desc="Validation Epoch", leave=True)
+        
+        with torch.no_grad():
+            for j,(input,target) in enumerate(val_dataloader):
+
+                input=input.to(device)
+                target=target.to(device)
+            
+                out=model(input)
+
+                # if j==0:
+                #     plot_output_image(target[0,0,:,:],out[0,0,:,:],i,output_dir)
+
+                loss=segmentation_loss(target, out, device, class_weights, ignore_index)
+                batch_acc=compute_accuracy(target, out)
+                acc_dataset_val.append(batch_acc)
+            
+                val_loss += loss.item() * input.size(0)
+                
+                miou_batch=calculate_miou(out, target, device)
+                miou_valid.append(miou_batch)
+                
+                #inner_pbar.update(1)
+                #inner_pbar.set_description(f"Validation Batch Loss: {loss.item()}, Validation RMSE: {rmse}", refresh=True)
+
+    
+        acc_total_val = np.mean(acc_dataset_val)
+        epoch_loss_val = val_loss / len(val_dataloader.dataset)
+        miou_valid = np.mean(miou_valid)
+
+        #inner_pbar.close()
+        
+        wandb.log({"epoch": i + 1, "val_loss": epoch_loss_val,"accuracy_val": acc_total_val,
+                   "miou_val": miou_valid})
+        
+        print(f"Epoch: {i}, train loss: {epoch_loss_train}, val loss: {epoch_loss_val}, accuracy_train: {acc_total_train}, 
+              accuracy_val:{acc_total_val}, miou_train:{miou_train},miou_val:{miou_valid}")
+        
+        #training_log.append({'Epoch': i, 'Training Loss': epoch_loss_train, 'Validation Loss': epoch_loss_val})
+        #training_log_df = pd.DataFrame(training_log)
+        #training_log_df.to_csv(os.path.join(output_dir, 'training_log.csv'), index=False)
+
+        # best checkpoints saved based on best mIOU for validation/test data
+        if i == 0:
+            best_loss = epoch_loss_val
+            best_miou_val = miou_valid
+
+        if miou_valid > best_miou_val:
+            save_checkpoint(model, optimizer, i, epoch_loss_train, epoch_loss_val, checkpoint)
+            best_miou_val = miou_valid
+        
+        # if i % 20 == 0:
+        #     plot_output_image(model, device, i, means, stds, segment_input, predicted_mask_dir)
+
+
+    wandb.finish()
+    
+if __name__ == "__main__":
+    main()

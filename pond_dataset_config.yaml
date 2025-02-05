@@ -1,0 +1,118 @@
+
+# Custom dataset params
+src_dir: /home/workdir/data/global_4_class
+train_dataset_name: ood_prediction
+train_csv_path: /home/workdir/data/global_4_class/train_images.csv
+val_csv_path: /home/workdir/data/global_4_class/val_images.csv
+
+apply_normalization: True
+normal_strategy: z_value
+stat_procedure: gpb
+# global_stats:
+#   min: [124.0, 308.0, 191.0, 598.0, 423.0, 271.0]
+#   max: [1207.0, 1765.0, 2366.0, 4945.0, 4646.0, 3897.0]
+#   mean: [0.120230265, 0.10370902, 0.08467793, 0.19951299, 0.109360956, 0.060086336]
+#   std: [0.01318866, 0.016127938, 0.021753421, 0.07539786, 0.054378532, 0.035520297]
+global_stats:
+  min: [0.0, 0.0040705763, 0.0073995986, 0.0, 0.0, 0.0]
+  max: [0.9566271, 0.9720825, 1.0, 0.671315, 0.9938183, 0.9232037]
+  mean: [0.055916585, 0.07825676, 0.099485956, 0.17510535, 0.15318502, 0.11263158]
+  std: [0.020870697, 0.0273139, 0.042786587, 0.08869097, 0.08902759, 0.069095954]
+transformations:
+- v_flip
+- h_flip
+- d_flip
+- rotate
+aug_params:
+  rotation_degree: [-180, -90, 90, 180]
+  nodata: null
+  clip_val: 0
+
+# DataLoader
+train_BatchSize: 10
+val_test_BatchSize: 1
+
+# Model initialization params
+n_classes: 4
+input_channels: 6
+filter_config: [64, 128, 256, 512, 1024, 2048]
+use_skipAtt: false
+train_dropout_rate: 0.15
+
+# Model compiler params
+working_dir: /home/workdir/baseline_results
+out_dir: output3
+class_mapping:
+  0: Other
+  1: Mangrove
+  2: Pond aquaculture
+  3: Water
+
+gpuDevices:
+- 7
+
+init_type: kaiming
+params_init: /home/workdir/baseline_results/output7/Unet_ep100/chkpt/Unet_final_state.pth
+freeze_params: null
+
+# Model fitting
+epochs: 100
+optimizer: adamw
+LR: 0.011
+LR_policy: PolynomialLR
+criterion:
+    name: TverskyFocalLoss
+    #name: LocallyWeightedTverskyFocalLoss
+    # weight:
+    # - 0.1295236564566017
+    # - 0.28468693695264996
+    # - 0.29059512003264765
+    # - 0.2951942865581007
+    weight:
+    - 0.0906
+    - 0.49
+    - 0.212
+    - 0.206
+
+    ignore_index: -100
+    gamma: 0.9
+
+momentum: 0.95
+checkpoint_interval: 20
+resume: false
+resume_epoch: null
+lr_prams:
+  # StepLR & MultiStepLR
+  weight_decay: 0.01
+  step_size: 3
+  milestones:
+  - 5
+  - 10
+  - 20
+  - 35
+  - 50
+  - 70
+  - 90
+  gamma: 0.98
+  # ReduceLROnPlateau
+  mode: triangular
+  factor: 0.8
+  patience: 3
+  threshold: 0.0001
+  threshold_mode: rel
+  min_lr: 3.0e-06
+  # PolynomialLR
+  max_decay_steps: 80
+  min_learning_rate: 1.0e-04
+  power: 0.85
+  # CyclicLR
+  base_lr: 3.0e-05
+  max_lr: 0.01
+  step_size_up: 1100
+  
+# Accuracy assessment
+val_metric_fname: validate_metrics_50p_samples.csv
+unknown_class_idx: null
+
+test_csv_path: /home/workdir/data/global_4_class/test_images.csv
+test_out_dir: /home/workdir/baseline_results/output7/normal_classWeight_mexico_pred_5

@@ -1,0 +1,27 @@
+name: my_satellite_env  # Change this to your preferred environment name
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pyyaml
+  - pytorch>=2.0.0
+  - torchvision
+  - xarray
+  - dask
+  - netCDF4
+  - bottleneck
+  - zarr
+  - timm
+  - einops
+  - yacs
+  - affine
+  - tqdm
+  - wandb
+  - PIL
+  - rasterio
+  - rioxarray
+  - geopandas
+  - pandas
+  - matplotlib
+  - scipy

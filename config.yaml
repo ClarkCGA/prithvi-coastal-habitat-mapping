@@ -1,0 +1,94 @@
+model:
+  name: "Prithvi_Global_aquaculture"
+  n_channel: 6
+  n_class: 4
+  encoder_embed_dim: 1024
+  dec_embed_dim: 512
+  dropout_rate: 0.2
+  arch: "prithvi"
+
+device_name: "cuda"
+#wandb_project: "Landsat-aquaculture-finetune-100prcnt-prithviGlobal"
+
+n_iteration: 100
+
+prithvi_model_new_weight: "/workspace/gfm-biomassters-td/checkpoint.pt"
+
+training:
+  train_batch_size: 1
+  learning_rate: 0.0001
+  shuffle: True
+  subset: 1
+
+  optimizer:
+    name: "AdamW"
+    params:
+      lr: 0.0001
+       
+
+  scheduler:
+    name: "StepLR"
+    params:
+      step_size: 10
+      gamma: 0.9
+
+
+validation:
+  val_batch_size: 2
+  shuffle: False
+
+
+
+data:
+  #input: ['S1', 'S2']
+  dataset_name: global_4_class
+  n_frame: 1
+  #n_time_steps: 4
+  data_dir: "/workspace/gfm-biomassters-td/BioMassters/"
+  train_csv_path: /home/workdir/data/global_4_class/train_images.csv
+  val_csv_path: /home/workdir/data/global_4_class/val_images.csv
+  #train_dir_input: "/rhome/rghosal/crop/training_chips"
+  #val_dir_input: "/rhome/rghosal/crop/validation_chips"
+  #train_annot: "/rhome/rghosal/crop/training_data.txt"
+  #val_annot: "/rhome/rghosal/crop/validation_data.txt"
+  apply_normalization: True
+  global_stats:
+    mean: [0.055916585, 0.07825676, 0.099485956, 0.17510535, 0.15318502, 0.11263158]
+    std: [0.020870697, 0.0273139, 0.042786587, 0.08869097, 0.08902759, 0.069095954]
+  
+  input_size: [1, 224, 224]
+  patch_size: [1, 16, 16]
+  transformations:
+  - v_flip
+  - h_flip
+  - d_flip
+  - rotate
+  #target_norm: "none"
+  #input_norm: "zscore"
+  
+Loss: "CrossEntropyLoss"
+class_weights:  [
+    0.386375,
+    0.661126,
+    0.548184,
+    0.640482,
+    0.876862,
+    0.925186,
+    3.249462,
+    1.542289,
+    2.175141,
+    2.272419,
+    3.062762,
+    3.626097,
+    1.198702
+  ]
+
+ignore_index: -1
+
+output_dir: "/workspace/scratch/"
+
+logging:
+checkpoint_dir: "/rhome/rghosal/Rinki/rinki-hls-foundation-os/prithvi_crop_checkpoint/checkpoint_crop10_prithvi.pth" 
+
+segment_input_path: "/rhome/rghosal/crop/validation_chips/chip_304_542_merged.tif"
+predicted_mask_dir: "./segment_out_prithvi_crop"
