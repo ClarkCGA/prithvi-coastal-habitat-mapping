@@ -199,12 +199,12 @@ def main():
     with open(os.path.join(output_dir, 'config.yaml'), 'w') as file:
         yaml.safe_dump(config, file)
     
-    wandb.init(
-             # set the wandb project where this run will be logged
-             project=config["wandb_project"]
-             )
+    # wandb.init(
+    #          # set the wandb project where this run will be logged
+    #          project=config["wandb_project"]
+    #          )
     
-    wandb.run.log_code(".")
+    # wandb.run.log_code(".")
     
     
     #initialize dataset class
@@ -235,7 +235,7 @@ def main():
     scheduler = LambdaLR(optimizer, lr_lambda=lr_lambda)
     
     #best_loss=torch.tensor(float('inf'))
-    #training_log = []
+    training_log = []
     best_loss = 0
     best_miou_val = 0
     
@@ -273,17 +273,17 @@ def main():
             loss.backward()
             optimizer.step()
             scheduler.step()
-            #inner_pbar.update(1)
-            #inner_pbar.set_description(f"Training Batch Loss: {loss.item()}, True RMSE: {rmse}", refresh=True)
+            
+            inner_pbar.update(1)
+            inner_pbar.set_description(f"Training Batch Loss: {loss.item()}, Training Batch mIoU: {miou_batch}", refresh=True)
 
         acc_total_train=np.mean(acc_dataset_train)
         miou_train=np.mean(miou_train)
         epoch_loss_train=(loss_i)/len(train_dataloader.dataset)
         
-        #epoch_loss_train=(loss_i)/len(train_dataloader.dataset)
-        #inner_pbar.close()
-        wandb.log({"epoch": i + 1, "train_loss": epoch_loss_train,"acc_train":acc_total_train,
-                   "learning_rate": optimizer.param_groups[0]['lr'],"miou_train":miou_train})
+        inner_pbar.close()
+        # wandb.log({"epoch": i + 1, "train_loss": epoch_loss_train,"acc_train":acc_total_train,
+        #            "learning_rate": optimizer.param_groups[0]['lr'],"miou_train":miou_train})
 
         ########### Validation Phase ############################################################
         model.eval()
@@ -291,7 +291,7 @@ def main():
         val_loss = 0.0
         miou_valid=[]
         acc_dataset_val=[]
-        #inner_pbar = tqdm.tqdm(range(len(val_dataloader)), colour="green", desc="Validation Epoch", leave=True)
+        inner_pbar = tqdm.tqdm(range(len(val_dataloader)), colour="green", desc="Validation Epoch", leave=True)
         
         with torch.no_grad():
             for j,(input,target) in enumerate(val_dataloader):
@@ -313,25 +313,27 @@ def main():
                 miou_batch=calculate_miou(out, target, device)
                 miou_valid.append(miou_batch)
                 
-                #inner_pbar.update(1)
-                #inner_pbar.set_description(f"Validation Batch Loss: {loss.item()}, Validation RMSE: {rmse}", refresh=True)
+                inner_pbar.update(1)
+                inner_pbar.set_description(f"Validation Batch Loss: {loss.item()}, Validation Batch mIoU: {miou_batch}", refresh=True)
 
     
         acc_total_val = np.mean(acc_dataset_val)
         epoch_loss_val = val_loss / len(val_dataloader.dataset)
         miou_valid = np.mean(miou_valid)
 
-        #inner_pbar.close()
+        inner_pbar.close()
         
-        wandb.log({"epoch": i + 1, "val_loss": epoch_loss_val,"accuracy_val": acc_total_val,
-                   "miou_val": miou_valid})
+        # wandb.log({"epoch": i + 1, "val_loss": epoch_loss_val,"accuracy_val": acc_total_val,
+        #            "miou_val": miou_valid})
         
         print(f"Epoch: {i}, train loss: {epoch_loss_train}, val loss: {epoch_loss_val}, accuracy_train: {acc_total_train}, 
               accuracy_val:{acc_total_val}, miou_train:{miou_train},miou_val:{miou_valid}")
         
-        #training_log.append({'Epoch': i, 'Training Loss': epoch_loss_train, 'Validation Loss': epoch_loss_val})
-        #training_log_df = pd.DataFrame(training_log)
-        #training_log_df.to_csv(os.path.join(output_dir, 'training_log.csv'), index=False)
+        training_log.append({'Epoch': i, 'Training Loss': epoch_loss_train, 'Validation Loss': epoch_loss_val,
+                             'Train Accuracy': acc_total_train, 'Validation Accuracy': acc_total_val, 'train mIOU': miou_train, 
+                             'Validation mIoU': miou_valid})
+        training_log_df = pd.DataFrame(training_log)
+        training_log_df.to_csv(os.path.join(output_dir, 'training_log.csv'), index=False)
 
         # best checkpoints saved based on best mIOU for validation/test data
         if i == 0:
@@ -346,7 +348,7 @@ def main():
         #     plot_output_image(model, device, i, means, stds, segment_input, predicted_mask_dir)
 
 
-    wandb.finish()
+    # wandb.finish()
     
 if __name__ == "__main__":
     main()
