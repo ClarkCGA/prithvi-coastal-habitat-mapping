@@ -8,17 +8,14 @@ dependencies:
   - pytorch>=2.0.0
   - torchvision
   - xarray
-  - dask
-  - netCDF4
   - bottleneck
-  - zarr
   - timm
   - einops
   - yacs
   - affine
   - tqdm
-  - wandb>=0.19
-  - PIL
+  - wandb
+  - pillow
   - rioxarray
   - geopandas
   - pandas

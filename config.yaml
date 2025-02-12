@@ -43,7 +43,7 @@ data:
   #input: ['S1', 'S2']
   dataset_name: global_4_class
   n_frame: 1
-  #n_time_steps: 4
+  n_time_steps: 1
   data_dir: "/workspace/gfm-biomassters-td/BioMassters/"
   train_csv_path: /home/workdir/data/global_4_class/train_images.csv
   val_csv_path: /home/workdir/data/global_4_class/val_images.csv

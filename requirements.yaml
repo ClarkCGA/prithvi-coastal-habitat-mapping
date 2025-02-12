@@ -18,7 +18,7 @@ dependencies:
   - affine
   - tqdm
   - wandb>=0.19
-  - PIL
+  - pillow
   - rioxarray=0.18.2
   - geopandas
   - pandas>=2.0

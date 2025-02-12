@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 #from prithvi_global_loader import prithvi
-from neck import Neck
-from models.Prithvi import TemporalViTEncoder
-from head import FCNHead
+from src.models.neck import Neck
+from src.models.Prithvi import TemporalViTEncoder
+from src.models.head import FCNHead
 
 
 ###########################################################################

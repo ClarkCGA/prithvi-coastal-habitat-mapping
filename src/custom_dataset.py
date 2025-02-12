@@ -6,7 +6,7 @@ import pandas as pd
 import torch
 from affine import Affine
 from torch.utils.data import Dataset
-from utils import load_data, flip
+from src.utils import load_data, flip
 
 
 
