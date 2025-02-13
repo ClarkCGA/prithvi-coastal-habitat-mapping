@@ -18,13 +18,12 @@ def print_model_details(model):
 
 
 class prithvi_wrapper(nn.Module):
-    def __init__(self,n_channels, n_classes,n_frame,embed_size,input_size,patch_size,prithvi_weight,prithvi_config,in_chans):
+    def __init__(self,n_channels, n_classes, n_frame, embed_size, input_size, patch_size, prithvi_weight):
         super(prithvi_wrapper, self).__init__()
 
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.pr_weight=prithvi_weight
-        self.pr_config=prithvi_config
         self.n_frame=n_frame
         self.input_size=input_size
         self.embed_size=embed_size
@@ -36,9 +35,6 @@ class prithvi_wrapper(nn.Module):
         self.mlp_ratio = 4.0
         self.norm_layer= nn.LayerNorm
         self.norm_pix_loss = False
-        
-       
-        #(self.pr_weight,self.pr_config,n_frame,input_size,in_chans)
 
         #initialize and load weights for backbone from prithvi
         self.prithvi_backbone=TemporalViTEncoder(

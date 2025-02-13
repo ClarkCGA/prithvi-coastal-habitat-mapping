@@ -48,13 +48,13 @@ class AquacultureData(Dataset):
         img_fnames = [Path(dirpath) / f
                       for (dirpath, dirnames, filenames) in os.walk(Path(src_dir) / self.dataset_name) 
                       for f in filenames 
-                      if f.endswith(".tif") and ("merged" in f) and ('_'.join(Path(f).stem.split('_')[1:3]) in flag_ids)]
+                      if f.endswith(".tif") and ("band_chip" in f) and ('_'.join(Path(f).stem.split('_')[:-2]) in flag_ids)]
         img_fnames.sort()
 
         lbl_fnames = [Path(dirpath) / f 
                       for (dirpath, dirnames, filenames) in os.walk(Path(src_dir) / self.dataset_name) 
                       for f in filenames 
-                      if f.endswith(".tif") and ("mask" in f) and ('_'.join(Path(f).stem.split('_')[1:3]).split(".")[0] in flag_ids)]
+                      if f.endswith(".tif") and ("label_chip" in f) and ('_'.join(Path(f).stem.split('_')[:-2]) in flag_ids)]
         lbl_fnames.sort()
 
         if self.usage in ["train", "validation"]:

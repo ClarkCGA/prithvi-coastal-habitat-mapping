@@ -212,12 +212,25 @@ class TemporalViTEncoder(nn.Module):
             self.apply(self._init_weights)
             print(f"load from {self.pretrained}")
             checkpoint = torch.load(self.pretrained)
+            print("\n Checkpoint Keys:", checkpoint.keys())
             if checkpoint.get('model_state_dict'):
                 checkpoint['model'] = checkpoint.pop('model_state_dict')
             else:
                 del checkpoint['model']['patch_embed.proj.weight']  
-            #print("check point keys",checkpoint["model"].keys())
+            print("check point keys",checkpoint["model"].keys())
             model_weights = checkpoint['model']
+            
+            # Handle different checkpoint formats
+            # if 'model_state_dict' in checkpoint:
+            #     checkpoint['model'] = checkpoint.pop('model_state_dict')
+            # elif 'encoder.patch_embed.proj.weight' in checkpoint:  # Your checkpoint format
+            #     print("Checkpoint format detected: Using keys directly")
+            #     model_weights = checkpoint  # Use checkpoint directly as weights
+            # else:
+            #     raise KeyError("Unexpected checkpoint format! No 'model' or 'model_state_dict' found.")
+        
+            # model_weights = checkpoint
+
             self.load_state_dict(model_weights, strict=False)
             del checkpoint
 
