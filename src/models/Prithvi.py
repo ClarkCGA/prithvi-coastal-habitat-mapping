@@ -213,23 +213,14 @@ class TemporalViTEncoder(nn.Module):
             print(f"load from {self.pretrained}")
             checkpoint = torch.load(self.pretrained)
             print("\n Checkpoint Keys:", checkpoint.keys())
-            if checkpoint.get('model_state_dict'):
-                checkpoint['model'] = checkpoint.pop('model_state_dict')
-            else:
-                del checkpoint['model']['patch_embed.proj.weight']  
-            print("check point keys",checkpoint["model"].keys())
-            model_weights = checkpoint['model']
             
-            # Handle different checkpoint formats
-            # if 'model_state_dict' in checkpoint:
-            #     checkpoint['model'] = checkpoint.pop('model_state_dict')
-            # elif 'encoder.patch_embed.proj.weight' in checkpoint:  # Your checkpoint format
-            #     print("Checkpoint format detected: Using keys directly")
-            #     model_weights = checkpoint  # Use checkpoint directly as weights
-            # else:
-            #     raise KeyError("Unexpected checkpoint format! No 'model' or 'model_state_dict' found.")
-        
-            # model_weights = checkpoint
+            model_dict = self.state_dict()
+            model_weights = {k[8:]: v.cpu() for k, v in checkpoint.items() 
+                          if k.startswith(('encoder.', 'decoder.')) and k[8:] in model_dict}
+            for k in list(model_weights.keys()):
+                if any(substring in k for substring in ["pos_embed", "patch_embed.proj.weight"]):
+                    print(f"Removing {k} from checkpoint to prevent shape mismatch")
+                    del model_weights[k]
 
             self.load_state_dict(model_weights, strict=False)
             del checkpoint
@@ -375,17 +366,15 @@ class MaskedAutoencoderViT(nn.Module):
             self.apply(self._init_weights)
             print(f"load from {self.pretrained}")
             checkpoint = torch.load(self.pretrained)
-            if checkpoint.get('model_state_dict'):
-                checkpoint['model'] = checkpoint.pop('model_state_dict')
-            else:
-                #del checkpoint['model']['pos_embed'] 
-                #del checkpoint['model']['decoder_pos_embed']
-                del checkpoint['model']['patch_embed.proj.weight']  
-                del checkpoint['model']['patch_embed.proj.bias']
-                del checkpoint['model']['decoder_pred.weight']
-                del checkpoint['model']['decoder_pred.bias']
-            #print("check point keys",checkpoint["model"].keys())
-            model_weights = checkpoint['model']
+            
+            model_dict = self.state_dict()
+            model_weights = {k[8:]: v.cpu() for k, v in checkpoint.items() 
+                          if k.startswith(('encoder.', 'decoder.')) and k[8:] in model_dict}
+            for k in list(model_weights.keys()):
+                if any(substring in k for substring in ["pos_embed", "patch_embed.proj.weight"]):
+                    print(f"Removing {k} from checkpoint to prevent shape mismatch")
+                    del model_weights[k]
+
             self.load_state_dict(model_weights, strict=False)
             del checkpoint
 
