@@ -29,7 +29,8 @@ class AquacultureData(Dataset):
         if in the inference phase.
     """
 
-    def __init__(self, src_dir, usage, dataset_name, csv_path, apply_normalization=False, 
+    # version I am modifying
+    def __init__(self, src_dir, usage, dataset_name, csv_path=None, apply_normalization=False, 
                  global_stats=None, trans=None, **kwargs):
 
         self.usage = usage
@@ -40,24 +41,24 @@ class AquacultureData(Dataset):
 
         assert self.usage in ["train", "validation", "inference"], "Usage is not recognized."
 
-        catalog = pd.read_csv(csv_path, header=None)
-        flag_ids = catalog[0].tolist()
-        #bad_tiles = ['305_343', '417_328', '419_322', '419_323', '417_321']
-        #flag_ids = [item for item in flag_ids_unrefined if item not in bad_tiles]
-
-        img_fnames = [Path(dirpath) / f
-                      for (dirpath, dirnames, filenames) in os.walk(Path(src_dir) / self.dataset_name) 
-                      for f in filenames 
-                      if f.endswith(".tif") and ("band_chip" in f) and ('_'.join(Path(f).stem.split('_')[:-2]) in flag_ids)]
-        img_fnames.sort()
-
-        lbl_fnames = [Path(dirpath) / f 
-                      for (dirpath, dirnames, filenames) in os.walk(Path(src_dir) / self.dataset_name) 
-                      for f in filenames 
-                      if f.endswith(".tif") and ("label_chip" in f) and ('_'.join(Path(f).stem.split('_')[:-2]) in flag_ids)]
-        lbl_fnames.sort()
-
         if self.usage in ["train", "validation"]:
+            assert csv_path is not None, "For training/validation you must provide a csv for data splitting."
+            catalog = pd.read_csv(csv_path, header=None)
+            flag_ids = catalog[0].tolist()
+            #bad_tiles = ['305_343', '417_328', '419_322', '419_323', '417_321']
+            #flag_ids = [item for item in flag_ids_unrefined if item not in bad_tiles]
+
+            img_fnames = [Path(dirpath) / f
+                        for (dirpath, dirnames, filenames) in os.walk(Path(src_dir) / self.dataset_name) 
+                        for f in filenames 
+                        if f.endswith(".tif") and ("band_chip" in f) and ('_'.join(Path(f).stem.split('_')[:-2]) in flag_ids)]
+            img_fnames.sort()
+
+            lbl_fnames = [Path(dirpath) / f 
+                        for (dirpath, dirnames, filenames) in os.walk(Path(src_dir) / self.dataset_name) 
+                        for f in filenames 
+                        if f.endswith(".tif") and ("label_chip" in f) and ('_'.join(Path(f).stem.split('_')[:-2]) in flag_ids)]
+            lbl_fnames.sort()
 
             self.img_chips = []
             self.lbl_chips = []
@@ -79,6 +80,19 @@ class AquacultureData(Dataset):
                 self.img_chips.append(img_chip)
                 self.lbl_chips.append(lbl_chip)
         else:
+            
+            img_fnames = [Path(dirpath) / f
+                        for (dirpath, dirnames, filenames) in os.walk(Path(src_dir) / self.dataset_name) 
+                        for f in filenames 
+                        if f.endswith(".tif") and ("band_chip" in f)]
+            img_fnames.sort()
+
+            lbl_fnames = [Path(dirpath) / f 
+                        for (dirpath, dirnames, filenames) in os.walk(Path(src_dir) / self.dataset_name) 
+                        for f in filenames 
+                        if f.endswith(".tif") and ("label_chip" in f)]
+            
+            lbl_fnames.sort()
             self.img_chips = []
             self.lbl_chips = []
             self.ids = []

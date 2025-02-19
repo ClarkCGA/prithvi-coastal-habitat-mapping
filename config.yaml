@@ -39,6 +39,10 @@ validation:
   val_batch_size: 2
   shuffle: False
 
+inference:
+  inference_batch_size: 1
+  shuffle: False
+  pred_outdir: /workspace/SamK/prithvi_v2/results/pred
 
 
 data:
