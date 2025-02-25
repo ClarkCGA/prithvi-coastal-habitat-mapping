@@ -141,6 +141,7 @@ class AquacultureData(Dataset):
             label = torch.from_numpy(np.ascontiguousarray(lbl_chip)).long()
             # shape from (H,W,C) --> (C,H,W)
             img_chip = torch.from_numpy(img_chip.transpose((2, 0, 1))).float()
+            img_chip = img_chip.unsqueeze(1)
 
             return img_chip, label
         
@@ -152,6 +153,7 @@ class AquacultureData(Dataset):
             img_meta = self.get_metadata_dict(self.meta_ls[index])
             
             img_chip = torch.from_numpy(img_chip.transpose((2, 0, 1))).float()
+            img_chip = img_chip.unsqueeze(1)
             label = torch.from_numpy(np.ascontiguousarray(lbl_chip)).long()
 
             return img_chip, label, img_id, img_meta

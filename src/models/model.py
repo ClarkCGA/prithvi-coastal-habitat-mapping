@@ -70,13 +70,11 @@ class prithvi_wrapper(nn.Module):
 
         #Reshape the input into 6 channel and 3 timeframes
         C=int(C/self.n_frame) #18/3=6
-
-        x1=x
-        x2=x1.reshape(B,self.n_frame,C,H,W) #8,3,6,224,224
-        x3=x2.transpose(1,2) #8,6,3,224,224
+        x=x.reshape(B,self.n_frame,C,H,W).contiguous() #8,3,6,224,224
+        x=x.transpose(1,2).contiguous() #8,6,3,224,224
         
         #print("x shape",x3.shape)
-        pri_out=self.prithvi_backbone(x3)  #8,589,1024
+        pri_out=self.prithvi_backbone(x)  #8,589,1024
 
         #eliminate class token
         pri_out=pri_out[:,1:,:]  #8,588,1024
@@ -85,17 +83,16 @@ class prithvi_wrapper(nn.Module):
         n_patch=int(pri_out.shape[1]/self.n_frame) #588/3=196
         embed_size_neck=int(self.embed_size*self.n_frame) #1024*3=3096
 
-        pri_op1=pri_out
-        pri_op2=pri_op1.reshape(B,self.n_frame,n_patch,self.embed_size) #8,3,196,1024
-        pri_op3=pri_op2.transpose(1,2) #8,196,3,1024
-        pri_op4=pri_op3.flatten(2) #8,196,3*1024 =8,196,3072
-        pri_op5=pri_op4.transpose(1,2) #8,3072,196
+        pri_out=pri_out.reshape(B, self.n_frame, n_patch, self.embed_size).contiguous() #8,3,196,1024
+        pri_out=pri_out.transpose(1,2).contiguous() #8,196,3,1024
+        pri_out=pri_out.flatten(2) #8,196,3*1024 =8,196,3072
+        pri_out=pri_out.transpose(1,2).contiguous() #8,3072,196
 
         H=int(self.input_size[1]/self.patch_size[1]) #224/16=14
-        pri_out_final=pri_op5.reshape(B,embed_size_neck,H,H) #8,3072,14,14
+        pri_out=pri_out.reshape(B, embed_size_neck, H, H).contiguous() #8,3072,14,14
 
-        neck_out=self.neck(pri_out_final) #8, 3072, 224, 224
+        neck_out=self.neck(pri_out)     #8x3072x224x224
 
-        out=self.Seg_head(neck_out)#8,13,224,224
+        out=self.Seg_head(neck_out)     #8,13,224,224
         
         return out

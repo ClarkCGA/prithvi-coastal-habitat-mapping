@@ -10,14 +10,14 @@ model:
 device_name: "cuda"
 #wandb_project: "Landsat-aquaculture-finetune-100prcnt-prithviGlobal"
 
-n_iteration: 100
+n_iteration: 15
 
-#prithvi_model_new_weight: "/workspace/SamK/prithvi_v2/Prithvi_EO_V2_300M_TL.pt"
-prithvi_model_new_weight: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/Prithvi_EO_V2_300M.pt"
+prithvi_model_new_weight: "/workspace/SamK/prithvi_v2/Prithvi_EO_V2_300M.pt"
+#prithvi_model_new_weight: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/Prithvi_EO_V2_300M.pt"
 #prithvi_model_new_weight: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/checkpoint.pt"
 
 training:
-  train_batch_size: 1
+  train_batch_size: 3
   learning_rate: 0.0001
   shuffle: True
   subset: 1
@@ -36,13 +36,14 @@ training:
 
 
 validation:
-  val_batch_size: 2
+  val_batch_size: 1
   shuffle: False
 
 inference:
   inference_batch_size: 1
   shuffle: False
-  pred_outdir: /workspace/SamK/prithvi_v2/results/pred
+  pred_outdir: /workspace/SamK/prithvi_v2/results/100p/100p_pred
+  prithvi_finetune_weight: /workspace/SamK/prithvi_v2/results/100p/best_checkpoint.py
 
 
 data:
@@ -80,13 +81,14 @@ class_weights:  [
     0.2951942865581007
   ]
 
-ignore_index: -1
+ignore_index: -100
 
-#output_dir: "/workspace/SamK/prithvi_v2/results/"
-output_dir: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/results/"
+output_dir: "/workspace/SamK/prithvi_v2/results/100p"
+#output_dir: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/results/100p"
 
 logging:
-checkpoint_dir: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/results/chpt/checkpoint_aqa100_p.pth" 
+checkpoint_dir: "/workspace/SamK/prithvi_v2/results/chpt/checkpoint_aqa100_p.pth"
+#checkpoint_dir: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/results/chpt/checkpoint_aqa100_p.pth"  
 
 #segment_input_path: "/rhome/rghosal/crop/validation_chips/chip_304_542_merged.tif"
 #predicted_mask_dir: "./segment_out_prithvi_crop"

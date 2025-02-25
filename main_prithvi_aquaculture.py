@@ -47,17 +47,12 @@ def main():
     learning_rate=config["training"]["learning_rate"]
     class_weights=config["class_weights"]
     ignore_index=config["ignore_index"]
-    #segment_input=config["segment_input_path"]
+
     output_dir=config["output_dir"]
-    #class_weights=config["class_weights"]
-    #ignore_index=config["ignore_index"]
+
     input_size=config["data"]["input_size"]
     patch_size=config["data"]["patch_size"]
     checkpoint = os.path.join(output_dir, 'best_checkpoint.pt')
-    #subset = config["training"]["subset"]
-    #target_norm = config["data"]["target_norm"]
-    #input_norm = config["data"]["input_norm"]
-    input = config["data"]["input"]
     arch = config["model"]["arch"]
 
 
@@ -109,7 +104,7 @@ def main():
 
     optimizer = Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), weight_decay=0.05)
     optimizer_config = {'grad_clip': None}
-    scheduler = LambdaLR(optimizer, lr_lambda=lr_lambda)
+    #scheduler = LambdaLR(optimizer, lr_lambda=lr_lambda)
     
     #best_loss=torch.tensor(float('inf'))
     training_log = []
@@ -138,6 +133,10 @@ def main():
         
             optimizer.zero_grad()
             out = model(input)
+
+            #print(f"model output shape: {out.shape}")
+            #print(f"Input shape: {input.shape}")
+            #print(f"target shape: {target.shape}")
             loss=segmentation_loss(target, out, device, class_weights, ignore_index)
             loss_i += loss.item() * input.size(0)
             batch_acc = compute_accuracy(target, out)
@@ -147,7 +146,7 @@ def main():
 
             loss.backward()
             optimizer.step()
-            scheduler.step()
+            #scheduler.step()
             
             inner_pbar.update(1)
             inner_pbar.set_description(f"Training Batch Loss: {loss.item()}, Training Batch mIoU: {miou_batch}", refresh=True)
@@ -175,6 +174,9 @@ def main():
                 target=target.to(device)
             
                 out=model(input)
+                #print(f"model output shape: {out.shape}")
+                #print(f"Input shape: {input.shape}")
+                #print(f"target shape: {target.shape}")
 
                 # if j==0:
                 #     plot_output_image(target[0,0,:,:],out[0,0,:,:],i,output_dir)
@@ -201,8 +203,9 @@ def main():
         # wandb.log({"epoch": i + 1, "val_loss": epoch_loss_val,"accuracy_val": acc_total_val,
         #            "miou_val": miou_valid})
         
-        print(f"Epoch: {i}, train loss: {epoch_loss_train}, val loss: {epoch_loss_val}, accuracy_train: {acc_total_train}, 
-              accuracy_val:{acc_total_val}, miou_train:{miou_train},miou_val:{miou_valid}")
+        print(f"Epoch: {i}, train loss: {epoch_loss_train}, val loss: {epoch_loss_val}, " 
+              f"accuracy_train: {acc_total_train}, accuracy_val:{acc_total_val}, " 
+              f"miou_train:{miou_train},miou_val:{miou_valid}")
         
         training_log.append({'Epoch': i, 'Training Loss': epoch_loss_train, 'Validation Loss': epoch_loss_val,
                              'Train Accuracy': acc_total_train, 'Validation Accuracy': acc_total_val, 'train mIOU': miou_train, 

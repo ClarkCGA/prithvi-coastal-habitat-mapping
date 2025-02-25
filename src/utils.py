@@ -43,6 +43,7 @@ def save_checkpoint(model, optimizer, epoch, train_loss, val_loss, filename):
     torch.save(checkpoint, filename)
     print(f"Checkpoint saved at {filename}")
 
+
 def plot_output_image(target, output, epoch, output_dir):
 
     target = target.detach().cpu().numpy()
