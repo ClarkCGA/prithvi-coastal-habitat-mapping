@@ -1,8 +1,6 @@
 *.DS_Store
 *checkpoints*
 *pyc
-.ipynb_checkpoints/
-src/**/__pycache__/
-src/**/*.ipynb_checkpoints/
-notebooks/**/*.ipynb_checkpoints/
+**/__pycache__/
+**/*.ipynb_checkpoints/
 workspace/SamK/prithvi_v2/results/
