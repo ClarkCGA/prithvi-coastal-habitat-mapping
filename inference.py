@@ -83,7 +83,9 @@ def main():
     model_wrapper = models[arch]
     #wrapper of prithvi 
     model=model_wrapper(n_channel, n_class, n_frame, embed_size, input_size,
-                          patch_size, model_weights) 
+                          patch_size, prithvi_weight=None) 
+  
+    model.load_state_dict(torch.load(model_weights, map_location=device))
     model=model.to(device)
 
     model.eval()
