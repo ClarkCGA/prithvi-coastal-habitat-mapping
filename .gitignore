@@ -5,4 +5,4 @@
 src/**/__pycache__/
 src/**/*.ipynb_checkpoints/
 notebooks/**/*.ipynb_checkpoints/
-workspace/
+workspace/SamK/prithvi_v2/results/
