@@ -47,6 +47,7 @@ def main():
     learning_rate=config["training"]["learning_rate"]
     class_weights=config["class_weights"]
     ignore_index=config["ignore_index"]
+    freeze_backbone=config["training"]["freeze_backbone"]
 
     output_dir=config["output_dir"]
 
@@ -99,10 +100,10 @@ def main():
     model_wrapper = models[arch]
     #wrapper of prithvi #initialization of prithvi is done by initializing prithvi_loader.py
     model=model_wrapper(n_channel, n_class, n_frame, embed_size, input_size,
-                          patch_size,model_weights) 
+                          patch_size, model_weights, freeze_backbone) 
     model=model.to(device)
 
-    optimizer = Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), weight_decay=0.05)
+    optimizer = AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), weight_decay=0.05)
     optimizer_config = {'grad_clip': None}
     #scheduler = LambdaLR(optimizer, lr_lambda=lr_lambda)
     
@@ -224,6 +225,10 @@ def main():
         
         # if i % 20 == 0:
         #     plot_output_image(model, device, i, means, stds, segment_input, predicted_mask_dir)
+
+        if i == n_iteration - 1:
+            save_checkpoint(model, optimizer, i, epoch_loss_train, epoch_loss_val, 
+                            os.path.join(output_dir, 'last_checkpoint.pt'))
 
 
     # wandb.finish()

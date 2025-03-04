@@ -18,7 +18,7 @@ def print_model_details(model):
 
 
 class prithvi_wrapper(nn.Module):
-    def __init__(self,n_channels, n_classes, n_frame, embed_size, input_size, patch_size, prithvi_weight):
+    def __init__(self,n_channels, n_classes, n_frame, embed_size, input_size, patch_size, prithvi_weight, freeze_backbone=False):
         super(prithvi_wrapper, self).__init__()
 
         self.n_channels = n_channels
@@ -35,6 +35,7 @@ class prithvi_wrapper(nn.Module):
         self.mlp_ratio = 4.0
         self.norm_layer= nn.LayerNorm
         self.norm_pix_loss = False
+        self.freeze_backbone = freeze_backbone
 
         #initialize and load weights for backbone from prithvi
         self.prithvi_backbone=TemporalViTEncoder(
@@ -52,6 +53,10 @@ class prithvi_wrapper(nn.Module):
             self.pr_weight)
         
         #print("model details",print_model_details(self.prithvi_backbone))
+        
+        if self.freeze_backbone:
+            for param in self.prithvi_backbone.parameters():
+                param.requires_grad = False
         
         #initialize neck
         self.neck_embedding=self.embed_size*self.n_frame
