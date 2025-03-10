@@ -114,7 +114,7 @@ class AquacultureData(Dataset):
 
                 self.meta_ls.append(meta)
 
-                img_id = '_'.join(img_fname.stem.split('_')[1:3])
+                img_id = '_'.join(img_fname.stem.split('_')[:-2])
                 self.ids.append(img_id)
 
         

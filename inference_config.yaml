@@ -10,14 +10,14 @@ model:
 device_name: "cuda"
 #wandb_project: "Landsat-aquaculture-finetune-100prcnt-prithviGlobal"
 
-n_iteration: 120
+n_iteration: 300
 
 prithvi_model_new_weight: "/workspace/SamK/prithvi_v2/Prithvi_EO_V2_300M.pt"
 #prithvi_model_new_weight: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/Prithvi_EO_V2_300M.pt"
 #prithvi_model_new_weight: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/checkpoint.pt"
 
 training:
-  train_batch_size: 5
+  train_batch_size: 6
   learning_rate: 0.0001
   shuffle: True
   subset: 1
@@ -44,17 +44,17 @@ validation:
 inference:
   inference_batch_size: 1
   shuffle: False
-  pred_outdir: /workspace/SamK/prithvi_v2/results/50p/100p_pred
-  prithvi_finetune_weight: /workspace/SamK/prithvi_v2/results/100p/best_checkpoint.py
+  pred_outdir: /workspace/SamK/prithvi_v2/results/5p_freeze/5p_freeze_pred
+  prithvi_finetune_weight: /workspace/SamK/prithvi_v2/results/5p_freeze/best_checkpoint.pt
 
 
 data:
   #input: ['S1', 'S2']
-  dataset_name: train_val
+  dataset_name: pred_dataset
   n_frame: 1
   n_time_steps: 1
   data_dir: "/workspace/SamK/prithvi_v2/aquaculture_data"
-  train_csv_path: /workspace/SamK/prithvi_v2/aquaculture_data/train_images_25p.csv
+  train_csv_path: /workspace/SamK/prithvi_v2/aquaculture_data/train_images_5p.csv
   val_csv_path: /workspace/SamK/prithvi_v2/aquaculture_data/val_images.csv
   #train_dir_input: "/rhome/rghosal/crop/training_chips"
   #val_dir_input: "/rhome/rghosal/crop/validation_chips"
@@ -62,8 +62,10 @@ data:
   #val_annot: "/rhome/rghosal/crop/validation_data.txt"
   apply_normalization: True
   global_stats:
-    mean: [0.120230265, 0.10370902, 0.08467793, 0.19951299, 0.109360956, 0.060086336]
-    std: [0.01318866, 0.016127938, 0.021753421, 0.07539786, 0.054378532, 0.035520297]
+    #mean: [0.120230265, 0.10370902, 0.08467793, 0.19951299, 0.109360956, 0.060086336]
+    #std: [0.01318866, 0.016127938, 0.021753421, 0.07539786, 0.054378532, 0.035520297]
+    mean: [0.0558, 0.064634, 0.081967, 0.133313, 0.135670, 0.103967]
+    std: [0.034061, 0.048656, 0.072708, 0.117232, 0.134407, 0.106152]
   
   input_size: [1, 224, 224]
   patch_size: [1, 16, 16]
@@ -85,7 +87,7 @@ class_weights:  [
 
 ignore_index: -100
 
-output_dir: "/workspace/SamK/prithvi_v2/results/25p_fairIter_noFrz"
+output_dir: "/workspace/SamK/prithvi_v2/results/5p_noFrz_fairIter"
 #output_dir: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/results/100p"
 
 logging:

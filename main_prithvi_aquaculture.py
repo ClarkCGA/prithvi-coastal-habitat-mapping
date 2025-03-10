@@ -53,7 +53,6 @@ def main():
 
     input_size=config["data"]["input_size"]
     patch_size=config["data"]["patch_size"]
-    checkpoint = os.path.join(output_dir, 'best_checkpoint.pt')
     arch = config["model"]["arch"]
 
 
@@ -64,7 +63,7 @@ def main():
     print(f"Number of Input Channel: {n_channel}")
     print(f"Number of Segmentation Class: {n_class}")
     print(f"Used device name: {device}")
-    print(f"Checkpoint Path: {checkpoint}")
+    print(f"Checkpoint Dir: {output_dir}")
     print(f"Data input dir:{data_dir}")
     
     os.makedirs(output_dir, exist_ok=True)
@@ -220,7 +219,8 @@ def main():
             best_miou_val = miou_valid
 
         if miou_valid > best_miou_val:
-            save_checkpoint(model, optimizer, i, epoch_loss_train, epoch_loss_val, checkpoint)
+            save_checkpoint(model, optimizer, i, epoch_loss_train, epoch_loss_val, 
+                            os.path.join(output_dir, f"best_checkpoint_{i}.pt"))
             best_miou_val = miou_valid
         
         # if i % 20 == 0:
