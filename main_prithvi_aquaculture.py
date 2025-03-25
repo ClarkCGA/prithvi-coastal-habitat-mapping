@@ -98,8 +98,8 @@ def main():
     
     model_wrapper = models[arch]
     #wrapper of prithvi #initialization of prithvi is done by initializing prithvi_loader.py
-    model=model_wrapper(n_channel, n_class, n_frame, embed_size, input_size,
-                          patch_size, model_weights, freeze_backbone) 
+    #model=model_wrapper(n_channel, n_class, n_frame, embed_size, input_size,patch_size, model_weights, freeze_backbone)
+    model=model_wrapper(n_channel, n_class, n_frame, embed_size, input_size, patch_size, prithvi_weight=None, freeze_backbone=freeze_backbone) 
     model=model.to(device)
 
     optimizer = AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), weight_decay=0.05)

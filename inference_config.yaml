@@ -44,8 +44,8 @@ validation:
 inference:
   inference_batch_size: 1
   shuffle: False
-  pred_outdir: /workspace/SamK/prithvi_v2/results/5p_freeze/5p_freeze_ood_pred
-  prithvi_finetune_weight: /workspace/SamK/prithvi_v2/results/5p_freeze/best_checkpoint.pt
+  pred_outdir: /workspace/SamK/prithvi_v2/results/100p_scratch/100p_scratch_ood_pred
+  prithvi_finetune_weight: /workspace/SamK/prithvi_v2/results/100p_scratch/best_checkpoint_98.pt
 
 
 data:
@@ -54,7 +54,7 @@ data:
   n_frame: 1
   n_time_steps: 1
   data_dir: "/workspace/SamK/prithvi_v2/aquaculture_data"
-  train_csv_path: /workspace/SamK/prithvi_v2/aquaculture_data/train_images_5p.csv
+  train_csv_path: /workspace/SamK/prithvi_v2/aquaculture_data/train_images.csv
   val_csv_path: /workspace/SamK/prithvi_v2/aquaculture_data/val_images.csv
   #train_dir_input: "/rhome/rghosal/crop/training_chips"
   #val_dir_input: "/rhome/rghosal/crop/validation_chips"
@@ -62,12 +62,11 @@ data:
   #val_annot: "/rhome/rghosal/crop/validation_data.txt"
   apply_normalization: True
   global_stats:
+    # use with ID pred dataset
     #mean: [0.120230265, 0.10370902, 0.08467793, 0.19951299, 0.109360956, 0.060086336]
     #std: [0.01318866, 0.016127938, 0.021753421, 0.07539786, 0.054378532, 0.035520297]
     
-    # mean: [0.0558, 0.064634, 0.081967, 0.133313, 0.135670, 0.103967]
-    # std: [0.034061, 0.048656, 0.072708, 0.117232, 0.134407, 0.106152]
-    
+    # Use with OOD pred dataset
     mean: [0.055916585, 0.07825676, 0.099485956, 0.17510535, 0.15318502, 0.11263158]
     std: [0.020870697, 0.0273139, 0.042786587, 0.08869097, 0.08902759, 0.069095954]
   
@@ -91,7 +90,7 @@ class_weights:  [
 
 ignore_index: -100
 
-output_dir: "/workspace/SamK/prithvi_v2/results/5p_noFrz_fairIter"
+output_dir: "/workspace/SamK/prithvi_v2/results/100p_scratch"
 #output_dir: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/results/100p"
 
 logging:

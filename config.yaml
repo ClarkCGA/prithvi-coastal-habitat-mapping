@@ -10,14 +10,14 @@ model:
 device_name: "cuda"
 #wandb_project: "Landsat-aquaculture-finetune-100prcnt-prithviGlobal"
 
-n_iteration: 120
+n_iteration: 100
 
 prithvi_model_new_weight: "/workspace/SamK/prithvi_v2/Prithvi_EO_V2_300M.pt"
 #prithvi_model_new_weight: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/Prithvi_EO_V2_300M.pt"
 #prithvi_model_new_weight: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/checkpoint.pt"
 
 training:
-  train_batch_size: 5
+  train_batch_size: 6
   learning_rate: 0.0001
   shuffle: True
   subset: 1
@@ -54,7 +54,7 @@ data:
   n_frame: 1
   n_time_steps: 1
   data_dir: "/workspace/SamK/prithvi_v2/aquaculture_data"
-  train_csv_path: /workspace/SamK/prithvi_v2/aquaculture_data/train_images_25p.csv
+  train_csv_path: /workspace/SamK/prithvi_v2/aquaculture_data/train_images.csv
   val_csv_path: /workspace/SamK/prithvi_v2/aquaculture_data/val_images.csv
   #train_dir_input: "/rhome/rghosal/crop/training_chips"
   #val_dir_input: "/rhome/rghosal/crop/validation_chips"
@@ -85,7 +85,7 @@ class_weights:  [
 
 ignore_index: -100
 
-output_dir: "/workspace/SamK/prithvi_v2/results/25p_fairIter_noFrz"
+output_dir: "/workspace/SamK/prithvi_v2/results/100p_scratch"
 #output_dir: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/results/100p"
 
 logging:
