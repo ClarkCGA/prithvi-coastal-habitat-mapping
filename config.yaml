@@ -2,7 +2,8 @@ model:
   name: "Prithvi_Global_aquaculture"
   n_channel: 6
   n_class: 4
-  encoder_embed_dim: 1024
+  depth: 32     # 24 for 300M model
+  encoder_embed_dim: 1280     # 1024 for 300M model
   dec_embed_dim: 512
   dropout_rate: 0.2
   arch: "prithvi"
@@ -10,9 +11,9 @@ model:
 device_name: "cuda"
 #wandb_project: "Landsat-aquaculture-finetune-100prcnt-prithviGlobal"
 
-n_iteration: 100
+n_iteration: 250
 
-prithvi_model_new_weight: "/workspace/SamK/prithvi_v2/Prithvi_EO_V2_300M.pt"
+prithvi_model_new_weight: "/workspace/SamK/prithvi_v2/Prithvi_EO_V2_600M.pt"
 #prithvi_model_new_weight: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/Prithvi_EO_V2_300M.pt"
 #prithvi_model_new_weight: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/checkpoint.pt"
 
@@ -54,7 +55,7 @@ data:
   n_frame: 1
   n_time_steps: 1
   data_dir: "/workspace/SamK/prithvi_v2/aquaculture_data"
-  train_csv_path: /workspace/SamK/prithvi_v2/aquaculture_data/train_images.csv
+  train_csv_path: /workspace/SamK/prithvi_v2/aquaculture_data/train_images_5p.csv
   val_csv_path: /workspace/SamK/prithvi_v2/aquaculture_data/val_images.csv
   #train_dir_input: "/rhome/rghosal/crop/training_chips"
   #val_dir_input: "/rhome/rghosal/crop/validation_chips"
@@ -66,7 +67,7 @@ data:
     std: [0.01318866, 0.016127938, 0.021753421, 0.07539786, 0.054378532, 0.035520297]
   
   input_size: [1, 224, 224]
-  patch_size: [1, 16, 16]
+  patch_size: [1, 14, 14]    # [1, 16, 16] for 300M model
   transformations:
   - v_flip
   - h_flip
@@ -85,7 +86,7 @@ class_weights:  [
 
 ignore_index: -100
 
-output_dir: "/workspace/SamK/prithvi_v2/results/100p_scratch"
+output_dir: "/workspace/SamK/prithvi_v2/results/5p_600M_noFrz_p14"
 #output_dir: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/results/100p"
 
 logging:

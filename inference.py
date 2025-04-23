@@ -45,6 +45,7 @@ def main():
     n_class=config["model"]["n_class"]
     n_frame=config["data"]["n_frame"]
     embed_size=config["model"]["encoder_embed_dim"]
+    depth = config["model"]["depth"]
     
     output_dir=config["inference"]["pred_outdir"]
     
@@ -84,7 +85,7 @@ def main():
     #initialize model    
     model_wrapper = models[arch]
     #wrapper of prithvi 
-    model=model_wrapper(n_channel, n_class, n_frame, embed_size, input_size,
+    model=model_wrapper(n_channel, n_class, n_frame, embed_size, depth, input_size,
                           patch_size, prithvi_weight=None) 
   
     chkpt = torch.load(checkpoint, map_location=device)

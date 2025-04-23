@@ -1,3 +1,8 @@
-CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=6 torchrun --nproc_per_node=1 --rdzv_endpoint=0.0.0.0:29500 main_prithvi_aquaculture.py
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=4 torchrun --nproc_per_node=1 --rdzv_endpoint=0.0.0.0:29510 main_prithvi_aquaculture.py
 
-CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=6 torchrun --nproc_per_node=1 --rdzv_endpoint=0.0.0.0:29500 inference.py
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=4 torchrun --nproc_per_node=1 --rdzv_endpoint=0.0.0.0:29510 inference.py
+
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=6,7 torchrun --nproc_per_node=2 --rdzv_endpoint=0.0.0.0:29500 main_prithvi_aquaculture.py
+
+
+nvidia-smi && (nvidia-smi |tr -s ' '|grep -Eo "| [0123456789]+ N/A N/A [0-9]{3,} .*"|awk -F' ' '{system("s=$(cat /proc/"$4"/cmdline| tr \"\\0\" \" \");u=$(ps -o uname= -p "$4");echo "$1"sep"$4"sep$u sep"$7"sep$s" ) }'|sed 's/sep/\t/g')

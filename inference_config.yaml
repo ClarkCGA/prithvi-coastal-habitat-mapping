@@ -2,7 +2,10 @@ model:
   name: "Prithvi_Global_aquaculture"
   n_channel: 6
   n_class: 4
-  encoder_embed_dim: 1024
+  # 24 for 300M model, 32 for 600M
+  depth: 32     
+  # 1024 for 300M model, 1280 for 600M
+  encoder_embed_dim: 1280    
   dec_embed_dim: 512
   dropout_rate: 0.2
   arch: "prithvi"
@@ -12,7 +15,7 @@ device_name: "cuda"
 
 n_iteration: 300
 
-prithvi_model_new_weight: "/workspace/SamK/prithvi_v2/Prithvi_EO_V2_300M.pt"
+prithvi_model_new_weight: "/workspace/SamK/prithvi_v2/Prithvi_EO_V2_600M.pt"
 #prithvi_model_new_weight: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/Prithvi_EO_V2_300M.pt"
 #prithvi_model_new_weight: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/checkpoint.pt"
 
@@ -44,13 +47,13 @@ validation:
 inference:
   inference_batch_size: 1
   shuffle: False
-  pred_outdir: /workspace/SamK/prithvi_v2/results/100p_scratch/100p_scratch_ood_pred
-  prithvi_finetune_weight: /workspace/SamK/prithvi_v2/results/100p_scratch/best_checkpoint_98.pt
+  pred_outdir: /workspace/SamK/prithvi_v2/results/100p_600M_scratch_p14/100p_600M_scratch_p14_pred
+  prithvi_finetune_weight: /workspace/SamK/prithvi_v2/results/100p_600M_scratch_p14/best_checkpoint_97.pt
 
 
 data:
   #input: ['S1', 'S2']
-  dataset_name: ood_pred_dataset
+  dataset_name: pred_dataset
   n_frame: 1
   n_time_steps: 1
   data_dir: "/workspace/SamK/prithvi_v2/aquaculture_data"
@@ -63,15 +66,15 @@ data:
   apply_normalization: True
   global_stats:
     # use with ID pred dataset
-    #mean: [0.120230265, 0.10370902, 0.08467793, 0.19951299, 0.109360956, 0.060086336]
-    #std: [0.01318866, 0.016127938, 0.021753421, 0.07539786, 0.054378532, 0.035520297]
+    mean: [0.120230265, 0.10370902, 0.08467793, 0.19951299, 0.109360956, 0.060086336]
+    std: [0.01318866, 0.016127938, 0.021753421, 0.07539786, 0.054378532, 0.035520297]
     
     # Use with OOD pred dataset
-    mean: [0.055916585, 0.07825676, 0.099485956, 0.17510535, 0.15318502, 0.11263158]
-    std: [0.020870697, 0.0273139, 0.042786587, 0.08869097, 0.08902759, 0.069095954]
+    #mean: [0.055916585, 0.07825676, 0.099485956, 0.17510535, 0.15318502, 0.11263158]
+    #std: [0.020870697, 0.0273139, 0.042786587, 0.08869097, 0.08902759, 0.069095954]
   
   input_size: [1, 224, 224]
-  patch_size: [1, 16, 16]
+  patch_size: [1, 14, 14]    # [1, 16, 16] for 300M model
   transformations:
   - v_flip
   - h_flip
@@ -90,7 +93,7 @@ class_weights:  [
 
 ignore_index: -100
 
-output_dir: "/workspace/SamK/prithvi_v2/results/100p_scratch"
+output_dir: "/workspace/SamK/prithvi_v2/results/5p_scratch"
 #output_dir: "/mnt/c/Users/samkh/OneDrive/third_paper/prithviV2/results/100p"
 
 logging:

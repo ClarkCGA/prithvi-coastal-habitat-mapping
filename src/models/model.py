@@ -18,7 +18,7 @@ def print_model_details(model):
 
 
 class prithvi_wrapper(nn.Module):
-    def __init__(self,n_channels, n_classes, n_frame, embed_size, input_size, patch_size, prithvi_weight, freeze_backbone=False):
+    def __init__(self,n_channels, n_classes, n_frame, embed_size, depth, input_size, patch_size, prithvi_weight, freeze_backbone=False):
         super(prithvi_wrapper, self).__init__()
 
         self.n_channels = n_channels
@@ -28,9 +28,9 @@ class prithvi_wrapper(nn.Module):
         self.input_size=input_size
         self.embed_size=embed_size
         self.patch_size=patch_size
+        self.depth = depth
 
         self.tubelet_size=1
-        self.depth = 24
         self.num_heads = 16
         self.mlp_ratio = 4.0
         self.norm_layer= nn.LayerNorm
@@ -60,7 +60,7 @@ class prithvi_wrapper(nn.Module):
         
         #initialize neck
         self.neck_embedding=self.embed_size*self.n_frame
-        self.neck=Neck(self.neck_embedding)
+        self.neck=Neck(self.neck_embedding, self.patch_size)
 
         #initialize seg_head
         self.Seg_head=FCNHead(self.neck_embedding, 256, self.n_classes, dropout_p=0.1)

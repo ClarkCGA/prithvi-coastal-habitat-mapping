@@ -27,32 +27,33 @@ def main():
     with open('config.yaml', 'r') as file:
         config = yaml.safe_load(file)
     
-    device=config["device_name"]
-    n_channel=config["model"]["n_channel"]
-    n_class=config["model"]["n_class"]
-    n_frame=config["data"]["n_frame"]
-    n_time_steps=config["data"]["n_time_steps"]
-    n_iteration=config["n_iteration"]
-    embed_size=config["model"]["encoder_embed_dim"]
-    dec_embed_size=config["model"]["dec_embed_dim"]
-    data_dir=config["data"]["data_dir"]
-    dataset_name=config["data"]["dataset_name"]
-    train_csv_path=config["data"]["train_csv_path"]
-    val_csv_path=config["data"]["val_csv_path"]             
-    train_batch_size=config["training"]["train_batch_size"]
-    val_batch_size=config["validation"]["val_batch_size"]
-    apply_normalization=config["data"]["apply_normalization"]
-    global_stats=config["data"]["global_stats"]
-    transformations=config["data"]["transformations"]
-    learning_rate=config["training"]["learning_rate"]
-    class_weights=config["class_weights"]
-    ignore_index=config["ignore_index"]
-    freeze_backbone=config["training"]["freeze_backbone"]
+    device = config["device_name"]
+    n_channel = config["model"]["n_channel"]
+    n_class = config["model"]["n_class"]
+    n_frame = config["data"]["n_frame"]
+    n_time_steps = config["data"]["n_time_steps"]
+    n_iteration = config["n_iteration"]
+    depth = config["model"]["depth"]
+    embed_size = config["model"]["encoder_embed_dim"]
+    dec_embed_size = config["model"]["dec_embed_dim"]
+    data_dir = config["data"]["data_dir"]
+    dataset_name = config["data"]["dataset_name"]
+    train_csv_path = config["data"]["train_csv_path"]
+    val_csv_path = config["data"]["val_csv_path"]             
+    train_batch_size = config["training"]["train_batch_size"]
+    val_batch_size = config["validation"]["val_batch_size"]
+    apply_normalization = config["data"]["apply_normalization"]
+    global_stats = config["data"]["global_stats"]
+    transformations = config["data"]["transformations"]
+    learning_rate = config["training"]["learning_rate"]
+    class_weights = config["class_weights"]
+    ignore_index = config["ignore_index"]
+    freeze_backbone = config["training"]["freeze_backbone"]
 
-    output_dir=config["output_dir"]
+    output_dir = config["output_dir"]
 
-    input_size=config["data"]["input_size"]
-    patch_size=config["data"]["patch_size"]
+    input_size = config["data"]["input_size"]
+    patch_size = config["data"]["patch_size"]
     arch = config["model"]["arch"]
 
 
@@ -98,8 +99,8 @@ def main():
     
     model_wrapper = models[arch]
     #wrapper of prithvi #initialization of prithvi is done by initializing prithvi_loader.py
-    #model=model_wrapper(n_channel, n_class, n_frame, embed_size, input_size,patch_size, model_weights, freeze_backbone)
-    model=model_wrapper(n_channel, n_class, n_frame, embed_size, input_size, patch_size, prithvi_weight=None, freeze_backbone=freeze_backbone) 
+    model=model_wrapper(n_channel, n_class, n_frame, embed_size, depth, input_size, patch_size, model_weights, freeze_backbone)
+    #model=model_wrapper(n_channel, n_class, n_frame, embed_size, depth, input_size, patch_size, prithvi_weight=None, freeze_backbone=freeze_backbone) 
     model=model.to(device)
 
     optimizer = AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), weight_decay=0.05)
