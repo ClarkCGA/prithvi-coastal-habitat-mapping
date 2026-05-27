@@ -4,20 +4,16 @@ channels:
   - defaults
 dependencies:
   - python=3.10
-  - pyyaml
+  - pyyaml=6.0.2
   - pytorch>=2.0.0
   - torchvision
-  - xarray
-  - bottleneck
-  - timm
+  - xarray>=2025.1
+  - timm>=1.0.10
   - einops
-  - yacs
   - affine
   - tqdm
-  - wandb
+  - wandb>=0.19
   - pillow
-  - rioxarray
-  - geopandas
-  - pandas
+  - rioxarray=0.18.2
+  - pandas>=2.0
   - matplotlib
-  - scipy

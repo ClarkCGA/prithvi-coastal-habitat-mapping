@@ -38,6 +38,7 @@ def main():
     shuffle = config["inference"]["shuffle"]
     
     checkpoint = config["inference"]["prithvi_finetune_weight"]
+    fpn1_type = config["model"]["fpn1_type"]
     arch = config["model"]["arch"]
     
     device=config["device_name"]
@@ -86,7 +87,7 @@ def main():
     model_wrapper = models[arch]
     #wrapper of prithvi 
     model=model_wrapper(n_channel, n_class, n_frame, embed_size, depth, input_size,
-                          patch_size, prithvi_weight=None) 
+                          patch_size, prithvi_weight=None, fpn1_type=fpn1_type) 
   
     chkpt = torch.load(checkpoint, map_location=device)
     model_weights = chkpt['model_state_dict']

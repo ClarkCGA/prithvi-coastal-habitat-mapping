@@ -24,7 +24,7 @@ import pandas as pd
 
 def main():
 
-    with open('config.yaml', 'r') as file:
+    with open('config_300m.yaml', 'r') as file:
         config = yaml.safe_load(file)
     
     device = config["device_name"]
