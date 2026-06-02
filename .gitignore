@@ -1,0 +1,6 @@
+*.DS_Store
+*checkpoints*
+*pyc
+**/__pycache__/
+**/*.ipynb_checkpoints/
+workspace/SamK/prithvi_v2/results/
