@@ -1,4 +1,4 @@
-name: my_satellite_env  # Change this to your preferred environment name
+name: coastal-habitat  
 channels:
   - conda-forge
   - defaults
