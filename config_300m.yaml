@@ -10,11 +10,10 @@ model:
   arch: "prithvi"
 
 device_name: "cuda"
-#wandb_project: "Landsat-aquaculture-finetune-100prcnt-prithviGlobal"
 
 n_iteration: 300
 
-prithvi_model_new_weight: "" # <-- add path to pre-training model weights (example: "/mnt/c/My_documents/aquaculture_project/prithviV2/Prithvi_EO_V2_300M.pt")
+prithvi_model_new_weight: "" # <-- add path to pre-training model weights (example: "<My Folder>/Prithvi_EO_V2_300M.pt")
 
 
 training:
@@ -44,20 +43,19 @@ validation:
 
 
 data:
-  #input: ['S1', 'S2']
   dataset_name: train_val
   n_frame: 1
   n_time_steps: 1
-  data_dir: ""  # <-- add the path to the data directory for train/validation (example: /mnt/c/My_documents/aquaculture_project/prithviV2/aquaculture_data) 
-  train_csv_path: # <-- add the path to the training CSV file (example: /mnt/c/My_documents/aquaculture_project/prithviV2/aquaculture_data/train_images.csv)  
-  val_csv_path: # <-- add the path to the validation CSV file (example: /mnt/c/My_documents/aquaculture_project/prithviV2/aquaculture_data/val_images.csv)  
+  data_dir: ""  # <-- add the path to the data directory for train/validation (example: "<My Folder>/aquaculture_data") 
+  train_csv_path: # <-- add the path to the training CSV file (example: "<My Folder>/aquaculture_data/train_images.csv")  
+  val_csv_path: # <-- add the path to the validation CSV file (example: "<My Folder>/aquaculture_data/val_images.csv")  
   apply_normalization: True
   global_stats:
     mean: [0.120230265, 0.10370902, 0.08467793, 0.19951299, 0.109360956, 0.060086336]
     std: [0.01318866, 0.016127938, 0.021753421, 0.07539786, 0.054378532, 0.035520297]
   
   input_size: [1, 224, 224]
-  patch_size: [1, 16, 16]    # [1, 16, 16] for 300M model
+  patch_size: [1, 16, 16]    
   transformations:
   - v_flip
   - h_flip
@@ -74,4 +72,4 @@ class_weights:  [
 
 ignore_index: -100
 
-output_dir:  # <-- add the path to the output directory where you want to save the model checkpoints and logs (example: /mnt/c/My_documents/aquaculture_project/prithviV2/outputs)
+output_dir:  # <-- add the path to the output directory where you want to save the model checkpoints and logs (example: "<My Folder>/outputs)
