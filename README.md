@@ -59,4 +59,6 @@ CUDA_VISIBLE_DEVICES=[replace_with_the_GPU_index] torchrun --rdzv_endpoint=0.0.0
 
 ## Aquaculture Dataset
 
-## How to Reference our work
+## Citation
+If you use this code, please cit the following paper:
+S. Khallaghi et al., "Assessing the Robustness of Prithvi Geospatial Foundation Model for Coastal Habitat Mapping under Data Availability and Domain Shift Scenarios," in IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, doi: [10.1109/JSTARS.2026.3698337](http://doi.org/10.1109/JSTARS.2026.3698337). 
