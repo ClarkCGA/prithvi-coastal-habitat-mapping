@@ -1,30 +1,47 @@
-# prithvi-usecases: Coastal Habitat Mapping (Semantic Segmentation task)
+# Assessing the Robustness of Prithvi Geospatial Foundation Model for Coastal Habitat Mapping under Data Availability and Domain Shift Scenarios
+
+This repository contains the code for the analysis presented in [Assessing the Robustness of Prithvi Geospatial Foundation Model for Coastal Habitat Mapping under Data Availability and Domain Shift Scenarios](https://doi.org/10.1109/JSTARS.2026.3698337). Fine-tuning dataset and fine-tuned model weights are also published on Hugging Face. 
+
+## Requirements
+
+You need to have **Conda** installed before setting up the environment. You also need to have a GPU available on your machine. 
+
 
 ## How to use the code
 ### Step 1. Clone the repo
 ```bash
-git clone https://github.com/ClarkCGA/prithvi-usecases.git
-cd [cloned_repo_path]
+git clone https://github.com/git@github.com:ClarkCGA/prithvi-coastal-habitat-mapping.git
+cd prithvi-coastal-habitat-mapping
 ```
-#### **Notes:**
-- Replace `[cloned_repo_path]` with the actual path where the repository is cloned.
-- Make sure you have **Conda** installed before running the environment setup.
 
 ### Step 2. Create the environment
 ```bash
-conda create env -f environments.yaml
+conda create env -f environment.yaml
 ```
 
-### Step 3. How to do fine-tune for a semantic segmentation task
-- Get the pre-trained weights for Prithvi EO v2 from [HuggingFace](https://huggingface.co/ibm-nasa-geospatial/Prithvi-EO-2.0-300M). Models we used are "Prithvi-EO-2.0-300M" and "Prithvi-EO-2.0-600M".
-- Adapt the `custom_dataset.py` to the specification of your dataset if needed.
-- Update the `config_300m.yaml` or `config_600m.yaml` based on the Prithvi EO v2 variant you choose to run.
-- if you made changes to the dataset script (e.g. want to use a different dataset), then also update the `main_prithvi_aquaculture.py` and then run it from the CLI:
+### Step 3. Activate the environment
+```bash
+conda activate coastal-habitat 
+```
+
+### Step 4. Download labeled dataset and pre-trained models
+- Download the pre-trained weights for Prithvi EO 2.0 [300M parameter](https://huggingface.co/ibm-nasa-geospatial/Prithvi-EO-2.0-300M/blob/main/Prithvi_EO_V2_300M.pt) and [600M parameter](https://huggingface.co/ibm-nasa-geospatial/Prithvi-EO-2.0-600M/blob/main/Prithvi_EO_V2_600M.pt) from Hugging Face.
+- 
+- Adapt `src/custom_dataset.py` to the specification of your dataset if needed.
+- Update the `config_300m.yaml` or `config_600m.yaml` with file paths for model weights, data directory, and outputs folder.
+
+### Step 4. Training Models
+To fine-tune Prithvi EO 2.0 model variants using the pre-trained weights, run `main_prithvi_aquaculture.py` as following:
+
 ```bash
 CUDA_VISIBLE_DEVICES=[replace_with_the_GPU_index] torchrun --rdzv_endpoint=0.0.0.0:29500 main_prithvi_aquaculture.py
 ```
-### Note: 
-To run the Prithvi EO v2 model variants from scratch follow the instructions in step 3 but use the `main_prithvi_aquaculture_scratch.py` module instead.
+### Step 5. Train Prithvi architecture from scratch
+To train Prithvi EO 2.0 model variants from scratch, run `main_prithvi_aquaculture_scratch.py` as following:
+
+```bash
+CUDA_VISIBLE_DEVICES=[replace_with_the_GPU_index] torchrun --rdzv_endpoint=0.0.0.0:29500 main_prithvi_aquaculture_scratch.py
+```
 
 ### Note on running the baseline UNet model
 - To run the unet you need to use a different repo: [multi-temporal-crop-classification-baseline](https://github.com/ClarkCGA/multi-temporal-crop-classification-baseline)
