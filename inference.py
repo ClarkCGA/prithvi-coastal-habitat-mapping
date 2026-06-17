@@ -27,7 +27,11 @@ import pandas as pd
 
 def main():
 
-    with open('inference_config.yaml', 'r') as file:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str, required=True, help='Path to the inference YAML config file (e.g. configs/inference_config.yaml)')
+    args = parser.parse_args()
+
+    with open(args.config, 'r') as file:
         config = yaml.safe_load(file)
     
     data_dir = config["data"]["data_dir"]

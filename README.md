@@ -28,31 +28,31 @@ conda activate coastal-habitat
 - Download the pre-trained weights for Prithvi EO 2.0 [300M parameter](https://huggingface.co/ibm-nasa-geospatial/Prithvi-EO-2.0-300M/blob/main/Prithvi_EO_V2_300M.pt) and [600M parameter](https://huggingface.co/ibm-nasa-geospatial/Prithvi-EO-2.0-600M/blob/main/Prithvi_EO_V2_600M.pt) from Hugging Face.
 - 
 - Adapt `src/custom_dataset.py` to the specification of your dataset if needed.
-- Update the `config_300m.yaml` or `config_600m.yaml` with file paths for model weights, data directory, and outputs folder.
+- Update `configs/config_300m.yaml` or `configs/config_600m.yaml` with file paths for model weights, data directory, and outputs folder.
 
 ### Step 4. Training Models
 To fine-tune Prithvi EO 2.0 model variants using the pre-trained weights, run `main_prithvi_aquaculture.py` as following:
 
 ```bash
-CUDA_VISIBLE_DEVICES=[replace_with_the_GPU_index] torchrun --rdzv_endpoint=0.0.0.0:29500 main_prithvi_aquaculture.py
+CUDA_VISIBLE_DEVICES=[replace_with_the_GPU_index] torchrun --rdzv_endpoint=0.0.0.0:29500 main_prithvi_aquaculture.py --config configs/[name_of_the_config]
 ```
 ### Step 5. Train Prithvi architecture from scratch
 To train Prithvi EO 2.0 model variants from scratch, run `main_prithvi_aquaculture_scratch.py` as following:
 
 ```bash
-CUDA_VISIBLE_DEVICES=[replace_with_the_GPU_index] torchrun --rdzv_endpoint=0.0.0.0:29500 main_prithvi_aquaculture_scratch.py
+CUDA_VISIBLE_DEVICES=[replace_with_the_GPU_index] torchrun --rdzv_endpoint=0.0.0.0:29500 main_prithvi_aquaculture_scratch.py --config configs/[name_of_the_config]
 ```
 
 ### Note on running the baseline UNet model
 - To run the unet you need to use a different repo: [multi-temporal-crop-classification-baseline](https://github.com/ClarkCGA/multi-temporal-crop-classification-baseline)
-- Update the `config_unet.yaml` and add it to the config folder of the "multi-temporal-crop-classification-baseline" repo and follow the readme instructions of that repo.
+- Update `configs/config_unet.yaml` and add it to the config folder of the "multi-temporal-crop-classification-baseline" repo and follow the readme instructions of that repo.
 
 ### Step 4. How to do inference
 
-- Make sure the inference section of config.py is uptodated.
+- Make sure `configs/inference_config.yaml` is up to date.
 - Run from CLI:
 ```bash
-CUDA_VISIBLE_DEVICES=[replace_with_the_GPU_index] torchrun --rdzv_endpoint=0.0.0.0:29500 inference.py
+CUDA_VISIBLE_DEVICES=[replace_with_the_GPU_index] torchrun --rdzv_endpoint=0.0.0.0:29500 inference.py --config configs/[name_of_the_config]
 ```
 
 ## Fine-tuned model weights to use or replicate our work

@@ -24,7 +24,11 @@ import pandas as pd
 
 def main():
 
-    with open('config_300m.yaml', 'r') as file:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str, required=True, help='Path to the YAML config file (e.g. configs/config_300m.yaml)')
+    args = parser.parse_args()
+
+    with open(args.config, 'r') as file:
         config = yaml.safe_load(file)
     
     device = config["device_name"]
