@@ -1,0 +1,75 @@
+model:
+  name: "Prithvi_Global_aquaculture"
+  n_channel: 6
+  n_class: 4
+  depth: 24   
+  encoder_embed_dim: 1024 
+  dec_embed_dim: 512
+  dropout_rate: 0.2
+  fpn1_type: "pixelshuffle"
+  arch: "prithvi"
+
+device_name: "cuda"
+
+n_iteration: 100
+
+prithvi_model_new_weight: "" # <-- add path to pre-training 300M model weights (example: "<My Folder>/Prithvi_EO_V2_300M.pt")
+
+
+training:
+  train_batch_size: 6
+  learning_rate: 0.0001
+  shuffle: True
+  subset: 1
+
+  freeze_backbone: False
+
+  optimizer:
+    name: "AdamW"
+    params:
+      lr: 0.0001
+       
+
+  scheduler:
+    name: "StepLR"
+    params:
+      step_size: 10
+      gamma: 0.9
+
+
+validation:
+  val_batch_size: 2
+  shuffle: False
+
+
+data:
+  dataset_name: train_val
+  n_frame: 1
+  n_time_steps: 1
+  data_dir: ""  # <-- add the path to the data directory for train/validation (example: "<My Folder>/aquaculture_data") 
+  train_csv_path: # <-- add the path to the training CSV file for 100% subset (example: "<My Folder>/aquaculture_data/train_images.csv")  
+  val_csv_path: # <-- add the path to the validation CSV file (example: "<My Folder>/aquaculture_data/val_images.csv")  
+  apply_normalization: True
+  global_stats:
+    mean: [0.120230265, 0.10370902, 0.08467793, 0.19951299, 0.109360956, 0.060086336]
+    std: [0.01318866, 0.016127938, 0.021753421, 0.07539786, 0.054378532, 0.035520297]
+  
+  input_size: [1, 224, 224]
+  patch_size: [1, 16, 16]    
+  transformations:
+  - v_flip
+  - h_flip
+  - d_flip
+  - rotate
+  
+Loss: "CrossEntropyLoss"
+class_weights:  [
+    0.1295236564566017, 
+    0.28468693695264996, 
+    0.29059512003264765,
+    0.2951942865581007
+  ]
+
+ignore_index: -100
+
+output_dir:  # <-- add the path to the output directory where you want to save the model checkpoints and logs (example: "<My Folder>/outputs)

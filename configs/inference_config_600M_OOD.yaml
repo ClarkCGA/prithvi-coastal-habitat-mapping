@@ -1,0 +1,35 @@
+model:
+  name: "Prithvi_Global_aquaculture"
+  n_channel: 6
+  n_class: 4
+  depth: 32    
+  encoder_embed_dim: 1280    
+  dec_embed_dim: 512
+  dropout_rate: 0.2
+  fpn1_type: "pixelshuffle"
+  arch: "prithvi"
+
+device_name: "cuda"
+#wandb_project: "Landsat-aquaculture-finetune-100prcnt-prithviGlobal"
+
+inference:
+  inference_batch_size: 1
+  shuffle: False
+  pred_outdir:                 # <-- add the path for prediction outputs (example: /mnt/c/My_documents/aquaculture_project/prithviV2/outpred)
+  prithvi_finetune_weight:     # <-- add the path for loading finetuned model weights (example: /mnt/c/My_documents/aquaculture_project/prithviV2/finetuned_model.pt)
+
+
+data:
+  dataset_name: OOD_pred_dataset 
+  n_frame: 1
+  n_time_steps: 1
+  data_dir:  ""                # <-- direct to the proper path for inference dataset
+  apply_normalization: True
+  global_stats:
+    # Use with OOD pred dataset
+    mean: [0.055916585, 0.07825676, 0.099485956, 0.17510535, 0.15318502, 0.11263158]
+    std: [0.020870697, 0.0273139, 0.042786587, 0.08869097, 0.08902759, 0.069095954]
+  
+  input_size: [1, 224, 224]
+  patch_size: [1, 16, 16]    # [1, 16, 16] for 300M model and [1, 14, 14] for 600M
+

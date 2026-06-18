@@ -42,6 +42,7 @@ To train Prithvi EO 2.0 model variants from scratch, run `main_prithvi_aquacultu
 ```bash
 CUDA_VISIBLE_DEVICES=[replace_with_the_GPU_index] torchrun --rdzv_endpoint=0.0.0.0:29500 main_prithvi_aquaculture_scratch.py --config configs/[name_of_the_config]
 ```
+You can use the same configs as in step 4 with no changes as `prithvi_weight=None` is hard-coded.
 
 ### Note on running the baseline UNet model
 - To run the unet you need to use a different repo: [multi-temporal-crop-classification-baseline](https://github.com/ClarkCGA/multi-temporal-crop-classification-baseline)
